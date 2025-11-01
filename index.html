@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="中学3年生の理科（物理分野）を中心にしたクイズ形式の学習サイトです！仕事・エネルギー・電流などをタップで確認しながら楽しく復習できます！">
+  <meta name="keywords" content="中3理科, 物理, クイズ, 学習, エネルギー, 電流, GitHub Pages, 中学生, 理科問題">
+  <meta name="author" content="あなたのGitHubユーザー名">
+  <meta property="og:title" content="中3理科・物理クイズ" />
+  <meta property="og:description" content="中3理科・物理分野を楽しく復習できるクイズサイト！" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://raw.githubusercontent.com/あなたのユーザー名/リポジトリ名/main/ogp.png" />
+  <meta property="og:url" content="https://あなたのユーザー名.github.io/リポジトリ名/" />
+  <title>中3理科・物理クイズ | GitHub Pages学習サイト</title>
+
+  <style>
+    :root{
+      --accent:#2563eb;
+      --ok:#16a34a;
+      --ng:#dc2626;
+      --bg:#f9fafb;
+      --card:#ffffff;
+    }
+    body{
+      font-family:"Noto Sans JP", system-ui, sans-serif;
+      background:var(--bg);
+      margin:0;
+      padding:20px;
+      color:#111827;
+    }
+    header{text-align:center;margin-bottom:20px;}
+    header h1{margin:0;font-size:1.6rem;color:var(--accent);}
+    header p{color:#4b5563;font-size:0.95rem;}
+    .container{max-width:800px;margin:0 auto;}
+    .card{
+      background:var(--card);
+      border-radius:10px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.1);
+      padding:16px;
+      margin-bottom:12px;
+    }
+    h2{font-size:1.1rem;margin-bottom:8px;color:#1f2937;}
+    input[type="text"]{padding:6px;border-radius:4px;border:1px solid #d1d5db;}
+    .btn{
+      background:var(--accent);
+      color:#fff;
+      border:none;
+      padding:6px 12px;
+      border-radius:6px;
+      cursor:pointer;
+    }
+    .btn.ghost{
+      background:#fff;
+      color:var(--accent);
+      border:1px solid var(--accent);
+    }
+    .hidden-text{
+      cursor:pointer;
+      background:rgba(0,0,0,0.05);
+      border-radius:6px;
+      padding:2px 6px;
+    }
+    .hidden-text[data-revealed="false"]{
+      color:transparent;
+      text-shadow:0 0 8px rgba(0,0,0,0.4);
+    }
+    .feedback{margin-left:8px;font-weight:700;}
+    .score{font-weight:700;text-align:center;margin-top:20px;}
+    footer{text-align:center;margin-top:30px;font-size:0.9rem;color:#6b7280;}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🧪 中3理科・物理クイズ！</h1>
+    <p>仕事・エネルギー・電流などをクイズ形式で復習しよう！</p>
+  </header>
+
+  <main class="container">
+    <div id="quiz"></div>
+    <div class="card score" id="score">0 / 0</div>
+  </main>
+
+  <footer>
+    © 2025 あなたの名前（GitHub Pages学習サイト）<br>
+    <a href="https://github.com/あなたのユーザー名/リポジトリ名" target="_blank">GitHubリポジトリを見る</a>
+  </footer>
+
+<script>
+const QUESTIONS = [
+  {id:"q1",prompt:"1Nの力で2m動かしたときの仕事は？（単位も）<br><span class='hidden-text' data-key='a1'>公式：仕事＝力×距離</span>",answer:"2j",hint:"力×距離！",solution:"1×2=2J！"},
+  {id:"q2",prompt:"100Nの力で1m持ち上げた仕事は？",answer:"100j",hint:"仕事＝力×距離！",solution:"100×1＝100J！"},
+  {id:"q3",prompt:"1Wの仕事を1秒間に行うときの単位は？",answer:"ワット",hint:"仕事率の単位！",solution:"仕事率＝W（ワット）！"},
+  {id:"q4",prompt:"2Aの電流・6Vの電圧→抵抗値は？",answer:"3ω",hint:"V=IR",solution:"6＝2×R→3Ω！"},
+  {id:"q5",prompt:"1Aを1秒流した電気量は？",answer:"1c",hint:"電気量＝電流×時間！",solution:"1クーロン！"},
+  {id:"q6",prompt:"電力P=VI。6V・2Aなら？",answer:"12w",hint:"掛け算！",solution:"12W（ワット）！"},
+  {id:"q7",prompt:"滑車を使っても仕事の大きさが変わらない理由は？<br><span class='hidden-text' data-key='a2'>力が小さくなった分、距離が長くなる</span>",answer:"力が小さくなった分距離が長くなる",hint:"滑車の原理！",solution:"力が半分→距離2倍→仕事一定！"},
+  {id:"q8",prompt:"位置エネルギーの公式は？",answer:"mgh",hint:"重力×高さ！",solution:"mgh！"},
+  {id:"q9",prompt:"運動エネルギーの公式は？",answer:"1/2mv^2",hint:"1/2×質量×速度²！",solution:"½mv²！"},
+  {id:"q10",prompt:"エネルギー保存の法則とは？<br><span class='hidden-text' data-key='a3'>エネルギーの総量は変わらない</span>",answer:"エネルギーの総量は変わらない",hint:"エネルギーは形を変える！",solution:"全体のエネルギー量は一定！"}
+];
+
+const quiz=document.getElementById("quiz");
+const score=document.getElementById("score");
+let state={total:QUESTIONS.length,correct:0,perQ:{}};
+
+function mount(){
+  QUESTIONS.forEach((q,i)=>{
+    state.perQ[q.id]={correct:false};
+    const card=document.createElement("div");
+    card.className="card";
+    card.innerHTML=`
+      <h2>第${i+1}問</h2>
+      <p>${q.prompt}</p>
+      <p><input type="text" id="input-${q.id}" placeholder="答えを入力">
+      <button class="btn" onclick="checkAnswer('${q.id}')">採点</button>
+      <span class="feedback" id="fb-${q.id}"></span></p>
+      <p><button class="btn ghost" onclick="toggleSolution('${q.id}')">解説表示</button></p>
+      <p id="sol-${q.id}" style="display:none">${q.solution}</p>
+      <p><small>ヒント：${q.hint}</small></p>
+    `;
+    quiz.appendChild(card);
+  });
+  updateScore();
+  document.addEventListener("click",e=>{
+    const ht=e.target.closest(".hidden-text");
+    if(ht) toggleHidden(ht);
+  });
+}
+
+function toggleHidden(el){
+  const now=el.getAttribute("data-revealed")==="true";
+  el.setAttribute("data-revealed",!now);
+}
+function toggleSolution(id){
+  const s=document.getElementById(`sol-${id}`);
+  s.style.display=s.style.display==="none"?"block":"none";
+}
+function checkAnswer(id){
+  const q=QUESTIONS.find(x=>x.id===id);
+  const input=document.getElementById(`input-${id}`);
+  const fb=document.getElementById(`fb-${id}`);
+  const user=input.value.trim().toLowerCase();
+  const correct=q.answer.trim().toLowerCase();
+  if(user===correct){
+    fb.textContent="正解！";
+    fb.style.color="var(--ok)";
+    state.perQ[id].correct=true;
+  }else{
+    fb.textContent=`不正解（答え：${q.answer}）`;
+    fb.style.color="var(--ng)";
+    state.perQ[id].correct=false;
+  }
+  updateScore();
+}
+function updateScore(){
+  const correct=Object.values(state.perQ).filter(x=>x.correct).length;
+  score.textContent=`正解数：${correct} / ${state.total}`;
+}
+mount();
+</script>
+</body>
+</html>
